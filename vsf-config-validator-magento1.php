@@ -2,21 +2,46 @@
 
 declare(strict_types=1);
 
-$mOption = getopt("m:");
+use Yireo\VsfConfigValidator\Application\Magento1;
+use Yireo\VsfConfigValidator\Application\Magento2;
+use Yireo\VsfConfigValidator\Help;
+use Yireo\VsfConfigValidator\Validator;
+use Yireo\VsfConfigValidator\VsfConfiguration;
+
+require_once __DIR__.'/src/Help.php';
+require_once __DIR__.'/src/Validator.php';
+require_once __DIR__.'/src/VsfConfiguration.php';
+require_once __DIR__.'/src/ApplicationInterface.php';
+
+$pOption = getopt("p:");
+$dOption = getopt("d:");
 $cOption = getopt("c:");
 
-if (empty($mOption) || empty($cOption)) {
+if (empty($pOption) || empty($dOption) || empty($cOption)) {
     Help::show();
 }
 
-$magentoDirectory = array_shift($mOption);
+$platform = array_shift($pOption);
+$directory = array_shift($dOption);
 $jsonFile = array_shift($cOption);
-if (empty($jsonFile) || empty($magentoDirectory)) {
+if (empty($jsonFile) || empty($directory)) {
     Help::show();
 }
 
-if (!is_dir($magentoDirectory) || !is_file($magentoDirectory . '/app/etc/local.xml')) {
-    die('Directory "' . $magentoDirectory . '" is not a Magento directory');
+if (!in_array($platform, ['magento1', 'magento2'])) {
+    die('Unknown platform');
+}
+
+if (!is_dir($directory)) {
+    die('Directory "' . $directory . '" does not exist');
+}
+
+if ($platform === 'magento1' && !is_file($directory . '/app/etc/local.xml')) {
+    die('Directory "' . $directory . '" is not a Magento 1 directory');
+}
+
+if ($platform === 'magento2' && !is_file($directory . '/app/etc/env.php')) {
+    die('Directory "' . $directory . '" is not a Magento 2 directory');
 }
 
 if (!is_file($jsonFile) || !preg_match('/\.json$/', $jsonFile)) {
@@ -24,261 +49,19 @@ if (!is_file($jsonFile) || !preg_match('/\.json$/', $jsonFile)) {
 }
 
 
-/**
- * Class Help
- */
-class Help
-{
-    public static function show()
-    {
-        echo 'Usage: php ' . basename(__FILE__) . ' [OPTIONS]' . PHP_EOL;
-        echo 'Options: ' . PHP_EOL;
-        echo ' -m MAGENTO_DIRECTORY' . PHP_EOL;
-        echo ' -c VSF_CONFIG_JSON' . PHP_EOL;
-        exit;
-    }
+
+if ($platform === 'magento1') {
+    require_once __DIR__.'/src/Application/Magento1.php';
+    $application = new Magento1($directory);
 }
 
-/**
- * Class Magento
- */
-class Magento
-{
-    /**
-     * @var string
-     */
-    private $directory;
-
-    /**
-     * @var array
-     */
-    private $attributeCodes;
-
-    /**
-     * Magento constructor.
-     * @param string $directory
-     */
-    public function __construct(string $directory)
-    {
-        $this->directory = $directory;
-        $this->init();
-    }
-
-    /**
-     * Initialize
-     */
-    public function init()
-    {
-        define('MAGENTO_ROOT', realpath($this->directory));
-        require_once $this->directory . '/app/bootstrap.php';
-        require_once $this->directory . '/app/Mage.php';
-        Mage::app();
-    }
-
-    /**
-     * @return array
-     */
-    public function getAttributeCodes(): array
-    {
-        if ($this->attributeCodes !== null) {
-            return $this->attributeCodes;
-        }
-
-        $attributeCollection = Mage::getModel('eav/entity_attribute')->getCollection();
-        $attributeCodes = [];
-        foreach ($attributeCollection as $attribute) {
-            $attributeCodes[] = $attribute->getAttributeCode();
-        }
-
-        $this->attributeCodes = $attributeCodes;
-        return $this->attributeCodes;
-    }
+if ($platform === 'magento2') {
+    require_once __DIR__.'/src/Application/Magento2.php';
+    $application = new Magento2($directory);
 }
 
-/**
- * Class VsfConfiguration
- */
-class VsfConfiguration
-{
-    /**
-     * @var string
-     */
-    private $jsonFile;
-
-    /**
-     * @var
-     */
-    private $data;
-
-    /**
-     * VsfConfiguration constructor.
-     * @param string $jsonFile
-     */
-    public function __construct(
-        string $jsonFile
-    ) {
-        $this->jsonFile = $jsonFile;
-        $this->init();
-    }
-
-    /**
-     * Initialize
-     */
-    public function init()
-    {
-        $data = json_decode(file_get_contents($this->jsonFile), true);
-        if (!$data) {
-            throw new InvalidArgumentException('Unable to read from JSON file "' . $this->jsonFile . '"');
-        }
-
-        $this->data = $data;
-    }
-
-    /**
-     * @return array
-     */
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    /**
-     * @param string $path
-     * @return array
-     */
-    public function getDataFromPath(string $path): array
-    {
-        $pathParts = explode('/', $path);
-        $data = $this->data;
-        foreach ($pathParts as $pathPart) {
-            if (isset($data[$pathPart])) {
-                $data = $data[$pathPart];
-                continue;
-            }
-
-            throw new InvalidArgumentException("Path '$path' does not exist in configuration");
-        }
-
-        return $data;
-    }
-}
-
-class Validator
-{
-    const ELASTICSEARCH_ATTRIBUTES = [
-        '_score'
-    ];
-
-    const SKIPPED_ATTRIBUTES = [
-        'attribute_set_id',
-        'category',
-        'color_options',
-        'configurable_options',
-        'configurable_children',
-        'custom_attributes',
-        'errors',
-        'final_price',
-        'final_price_incl_tax',
-        'final_price_tax',
-        'id',
-        'is_configured',
-        'links',
-        'minimal_regular_price',
-        'max_price',
-        'max_regular_price',
-        'options',
-        'original_price',
-        'original_price_incl_tax',
-        'parentSku',
-        'price_incl_tax',
-        'priceInclTax',
-        'priceInclTax',
-        'price_tax',
-        'priceTax',
-        'product_links',
-        'product_option',
-        'qty',
-        'regular_price',
-        'size_options',
-        'slug',
-        'special_price',
-        'special_price_incl_tax',
-        'specialPriceInclTax',
-        'special_price_tax',
-        'specialPriceTax',
-        'stock',
-        'tier_prices',
-        'type_id',
-    ];
-
-    /**
-     * @var Magento
-     */
-    private $magento;
-
-    /**
-     * @var VsfConfiguration
-     */
-    private $vsf;
-
-    /**
-     * Validator constructor.
-     * @param Magento $magento
-     * @param VsfConfiguration $vsf
-     */
-    public function __construct(Magento $magento, VsfConfiguration $vsf)
-    {
-        $this->magento = $magento;
-        $this->vsf = $vsf;
-    }
-
-    /**
-     * @param string $path
-     */
-    public function checkForConfigValuesInMagentoAttributes(string $path)
-    {
-        $vsfAttributes = $this->vsf->getDataFromPath($path);
-        foreach ($vsfAttributes as $vsfAttribute) {
-            $vsfAttribute = preg_replace('/^\*/', '', $vsfAttribute);
-            $vsfAttribute = preg_replace('/^\./', '', $vsfAttribute);
-
-            if (in_array($vsfAttribute, self::ELASTICSEARCH_ATTRIBUTES)) {
-                continue;
-            }
-
-            if (in_array($vsfAttribute, self::SKIPPED_ATTRIBUTES)) {
-                continue;
-            }
-
-            if (preg_match('/\./', $vsfAttribute)) {
-                continue;
-            } // @todo: Not implemented yet or not even needed?
-
-            if (!in_array($vsfAttribute, $this->magento->getAttributeCodes())) {
-                echo "ERROR: Config value '$path/$vsfAttribute' is not defined in Magento\n";
-            }
-        }
-    }
-
-    /**
-     * @param string $path
-     */
-    public function checkForMagentoAttributesInConfig(string $path)
-    {
-        $vsfAttributes = $this->vsf->getDataFromPath($path);
-        foreach ($this->magento->getAttributeCodes() as $magentoAttributeCode) {
-            if (!in_array($magentoAttributeCode, $vsfAttributes)) {
-                echo "WARNING: Magento attribute '$magentoAttributeCode' is not defined in configuration '$path'\n";
-            }
-        }
-    }
-
-
-}
-
-$magento = new Magento($magentoDirectory);
 $configuration = new VsfConfiguration($jsonFile);
-$validator = new Validator($magento, $configuration);
+$validator = new Validator($application, $configuration);
 
 $validator->checkForConfigValuesInMagentoAttributes('entities/productList/includeFields');
 $validator->checkForMagentoAttributesInConfig('entities/productList/includeFields');
