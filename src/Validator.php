@@ -44,6 +44,7 @@ class Validator
         'qty',
         'regular_price',
         'size_options',
+        'sku',
         'slug',
         'special_price',
         'special_price_incl_tax',
@@ -51,6 +52,7 @@ class Validator
         'special_price_tax',
         'specialPriceTax',
         'stock',
+        'tax_class_id',
         'tier_prices',
         'type_id',
     ];

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Yireo\VsfConfigValidator\Application;
@@ -43,7 +44,7 @@ class Magento2 implements ApplicationInterface
      */
     public function init()
     {
-        require_once __DIR__ . '/app/bootstrap.php';
+        require_once $this->directory . '/app/bootstrap.php';
 
         $bootstrap = Bootstrap::create(BP, $_SERVER);
         /** @var Http $app */
@@ -61,15 +62,13 @@ class Magento2 implements ApplicationInterface
             return $this->attributeCodes;
         }
 
-        $collectionFactory = $this->objectManager->get(
-            CollectionFactory::class
-        );
-
-        $attributes = $collectionFactory->create();
-        foreach ($attributes as $attribute) {
-            $this->attributeCodes[] = $attribute->getCode();
+        $collectionFactory = $this->objectManager->get(CollectionFactory::class);
+        $attributeCollection = $collectionFactory->create();
+        foreach ($attributeCollection as $attribute) {
+            $this->attributeCodes[] = $attribute->getAttributeCode();
         }
 
-        return $attributes;
+        sort($this->attributeCodes);
+        return $this->attributeCodes;
     }
 }

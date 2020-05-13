@@ -2,30 +2,25 @@
 
 declare(strict_types=1);
 
+use Yireo\VsfConfigValidator\Cli;
 use Yireo\VsfConfigValidator\Application\Magento1;
 use Yireo\VsfConfigValidator\Application\Magento2;
-use Yireo\VsfConfigValidator\Help;
 use Yireo\VsfConfigValidator\Validator;
 use Yireo\VsfConfigValidator\VsfConfiguration;
 
-require_once __DIR__.'/src/Help.php';
+require_once __DIR__.'/src/Cli.php';
 require_once __DIR__.'/src/Validator.php';
 require_once __DIR__.'/src/VsfConfiguration.php';
 require_once __DIR__.'/src/ApplicationInterface.php';
 
-$pOption = getopt("p:");
-$dOption = getopt("d:");
-$cOption = getopt("c:");
+$cli = new Cli;
 
-if (empty($pOption) || empty($dOption) || empty($cOption)) {
-    Help::show();
-}
-
-$platform = array_shift($pOption);
-$directory = array_shift($dOption);
-$jsonFile = array_shift($cOption);
-if (empty($jsonFile) || empty($directory)) {
-    Help::show();
+$platform = $cli->getOption('p');
+$directory = $cli->getOption('d');
+$jsonFile = $cli->getOption('c');
+if (empty($platform) || empty($jsonFile) || empty($directory)) {
+    echo "ERROR: Empty options specified\n";
+    $cli->show();
 }
 
 if (!in_array($platform, ['magento1', 'magento2'])) {

@@ -58,6 +58,8 @@ class Magento1 implements ApplicationInterface
         }
 
         $this->attributeCodes = $attributeCodes;
+        sort($this->attributeCodes);
+
         return $this->attributeCodes;
     }
 }
