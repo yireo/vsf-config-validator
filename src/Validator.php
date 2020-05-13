@@ -15,7 +15,9 @@ class Validator
 
     const SKIPPED_ATTRIBUTES = [
         'attribute_set_id',
+        'attributes_metadata',
         'category',
+        'category_ids',
         'color_options',
         'configurable_options',
         'configurable_children',

@@ -28,6 +28,7 @@ Probably errors are most useful, so you can pipe this command to only show error
 
 ## Todo
 - Is it bad to add non-existing Magento attributes to `excludeFields`?
+- Check why some attributes need to be skipped like `attributes_metadata`
 - Scan for StoreViews defined in Magento, but not defined in the VSF configuration
 - Scan for category options `includeFields`
 - Scan for attribute options `includeFields`
