@@ -33,4 +33,6 @@ Probably errors are most useful, so you can pipe this command to only show error
 - Scan for StoreViews defined in Magento, but not defined in the VSF configuration
 - Scan for category options `includeFields`
 - Scan for attribute options `includeFields`
-
+- Add validator for API-specific sections
+    - vsbridge section for M1 (secret, user)
+    - Whitelist / AllowedHosts
