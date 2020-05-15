@@ -1,0 +1,9 @@
+{
+  "name": "yireo/vsf-config-validator",
+  "description": "A simple PHP CLI tool to check whether your Vue Storefront PWA configuration matches the structure of your Magento site",
+  "autoload": {
+    "psr-4": {
+      "Yireo\\VsfConfigValidator\\": "src/"
+    }
+  }
+}

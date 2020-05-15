@@ -3,62 +3,15 @@ declare(strict_types=1);
 
 namespace Yireo\VsfConfigValidator;
 
+use Yireo\VsfConfigValidator\Validator\Attribute;
+use Yireo\VsfConfigValidator\Validator\ValidatorInterface;
+
 /**
  * Class Validator
  * @package Yireo\VsfConfigValidator
  */
-class Validator
+class Validator implements ValidatorInterface
 {
-    const ELASTICSEARCH_ATTRIBUTES = [
-        '_score'
-    ];
-
-    const SKIPPED_ATTRIBUTES = [
-        'attribute_set_id',
-        'attributes_metadata',
-        'category',
-        'category_ids',
-        'color_options',
-        'configurable_options',
-        'configurable_children',
-        'custom_attributes',
-        'errors',
-        'final_price',
-        'final_price_incl_tax',
-        'final_price_tax',
-        'id',
-        'is_configured',
-        'links',
-        'minimal_regular_price',
-        'max_price',
-        'max_regular_price',
-        'options',
-        'original_price',
-        'original_price_incl_tax',
-        'parentSku',
-        'price_incl_tax',
-        'priceInclTax',
-        'priceInclTax',
-        'price_tax',
-        'priceTax',
-        'product_links',
-        'product_option',
-        'qty',
-        'regular_price',
-        'size_options',
-        'sku',
-        'slug',
-        'special_price',
-        'special_price_incl_tax',
-        'specialPriceInclTax',
-        'special_price_tax',
-        'specialPriceTax',
-        'stock',
-        'tax_class_id',
-        'tier_prices',
-        'type_id',
-    ];
-
     /**
      * @var ApplicationInterface
      */
@@ -68,6 +21,13 @@ class Validator
      * @var VsfConfiguration
      */
     private $vsf;
+
+    /**
+     * @var string[]
+     */
+    private $subValidatorClasses = [
+        Attribute::class
+    ];
 
     /**
      * Validator constructor.
@@ -81,43 +41,16 @@ class Validator
     }
 
     /**
-     * @param string $path
+     * @inheritDoc
      */
-    public function checkForConfigValuesInMagentoAttributes(string $path)
+    public function validate(): bool
     {
-        $vsfAttributes = $this->vsf->getDataFromPath($path);
-        foreach ($vsfAttributes as $vsfAttribute) {
-            $vsfAttribute = preg_replace('/^\*/', '', $vsfAttribute);
-            $vsfAttribute = preg_replace('/^\./', '', $vsfAttribute);
-
-            if (in_array($vsfAttribute, self::ELASTICSEARCH_ATTRIBUTES)) {
-                continue;
-            }
-
-            if (in_array($vsfAttribute, self::SKIPPED_ATTRIBUTES)) {
-                continue;
-            }
-
-            if (preg_match('/\./', $vsfAttribute)) {
-                continue; // @todo: Not implemented yet or not even needed?
-            }
-
-            if (!in_array($vsfAttribute, $this->application->getAttributeCodes())) {
-                echo "ERROR: Config value '$path/$vsfAttribute' is not defined in Magento\n";
-            }
+        foreach ($this->subValidatorClasses as $subValidatorClass) {
+            /** @var ValidatorInterface $subValidator */
+            $subValidator = new $subValidatorClass($this->application, $this->vsf);
+            $subValidator->validate();
         }
-    }
 
-    /**
-     * @param string $path
-     */
-    public function checkForMagentoAttributesInConfig(string $path)
-    {
-        $vsfAttributes = $this->vsf->getDataFromPath($path);
-        foreach ($this->application->getAttributeCodes() as $magentoAttributeCode) {
-            if (!in_array($magentoAttributeCode, $vsfAttributes)) {
-                echo "WARNING: Magento attribute '$magentoAttributeCode' is not defined in configuration '$path'\n";
-            }
-        }
+        return true;
     }
 }

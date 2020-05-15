@@ -8,10 +8,12 @@ use Yireo\VsfConfigValidator\Application\Magento2;
 use Yireo\VsfConfigValidator\Validator;
 use Yireo\VsfConfigValidator\VsfConfiguration;
 
-require_once __DIR__.'/src/Cli.php';
-require_once __DIR__.'/src/Validator.php';
-require_once __DIR__.'/src/VsfConfiguration.php';
-require_once __DIR__.'/src/ApplicationInterface.php';
+$autoloader = __DIR__.'/vendor/autoload.php';
+if (!file_exists($autoloader)) {
+    die("Make sure to run `composer install` first\n");
+}
+
+require_once $autoloader;
 
 $cli = new Cli;
 
@@ -57,18 +59,6 @@ if ($platform === 'magento2') {
 
 $configuration = new VsfConfiguration($jsonFile);
 $validator = new Validator($application, $configuration);
-
-$validator->checkForConfigValuesInMagentoAttributes('entities/productList/includeFields');
-$validator->checkForMagentoAttributesInConfig('entities/productList/includeFields');
-$validator->checkForConfigValuesInMagentoAttributes('entities/productList/excludeFields');
-$validator->checkForMagentoAttributesInConfig('entities/productList/excludeFields');
-$validator->checkForConfigValuesInMagentoAttributes('entities/productListWithChildren/includeFields');
-$validator->checkForMagentoAttributesInConfig('entities/productListWithChildren/includeFields');
-$validator->checkForConfigValuesInMagentoAttributes('entities/productListWithChildren/excludeFields');
-$validator->checkForMagentoAttributesInConfig('entities/productListWithChildren/excludeFields');
-$validator->checkForConfigValuesInMagentoAttributes('entities/product/standardSystemFields');
-$validator->checkForMagentoAttributesInConfig('entities/product/standardSystemFields');
-$validator->checkForConfigValuesInMagentoAttributes('entities/product/excludeFields');
-$validator->checkForMagentoAttributesInConfig('entities/product/excludeFields');
+$validator->validate();
 
 # End

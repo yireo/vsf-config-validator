@@ -9,6 +9,7 @@ Clone this repository to your system:
 And run the CLI tool:
 
     cd vsf-config-validator/
+    composer install
     php ./vsf-config-validator.php -p magento1 -d MAGENTO_DIRECTORY -c VSF_CONFIG_JSON
 
 The flag `-p` should either be `magento1` or `magento2`.
