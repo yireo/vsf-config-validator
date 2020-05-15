@@ -60,6 +60,7 @@ class AttributeValidator implements ValidatorInterface
         'stock',
         'tax_class_id',
         'tier_prices',
+        'tsk',
         'type_id',
     ];
 
