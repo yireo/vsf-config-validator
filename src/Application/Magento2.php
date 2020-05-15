@@ -71,4 +71,12 @@ class Magento2 implements ApplicationInterface
         sort($this->attributeCodes);
         return $this->attributeCodes;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getValidatorClasses(): array
+    {
+        return [];
+    }
 }

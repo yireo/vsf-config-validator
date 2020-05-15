@@ -58,7 +58,7 @@ if ($platform === 'magento2') {
 }
 
 $configuration = new VsfConfiguration($jsonFile);
-$validator = new Validator($application, $configuration);
-$validator->validate();
+$validator = new Validator();
+$validator->validate($application, $configuration);
 
 # End

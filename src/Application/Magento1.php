@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace Yireo\VsfConfigValidator\Application;
 
-use Yireo\VsfConfigValidator\ApplicationInterface;
 use Mage;
+use Yireo\VsfConfigValidator\ApplicationInterface;
+use Yireo\VsfConfigValidator\Application\Magento1\VsBridgeValidator;
 
 /**
  * Class Magento1
@@ -61,5 +62,15 @@ class Magento1 implements ApplicationInterface
         sort($this->attributeCodes);
 
         return $this->attributeCodes;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getValidatorClasses(): array
+    {
+        return [
+            VsBridgeValidator::class
+        ];
     }
 }

@@ -8,5 +8,13 @@ namespace Yireo\VsfConfigValidator;
  */
 interface ApplicationInterface
 {
+    /**
+     * @return string[]
+     */
+    public function getValidatorClasses(): array;
+
+    /**
+     * @return string[]
+     */
     public function getAttributeCodes(): array;
 }

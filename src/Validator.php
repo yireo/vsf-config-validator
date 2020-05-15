@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Yireo\VsfConfigValidator;
 
-use Yireo\VsfConfigValidator\Validator\Attribute;
+use Yireo\VsfConfigValidator\Validator\AttributeValidator;
 use Yireo\VsfConfigValidator\Validator\ValidatorInterface;
 
 /**
@@ -13,42 +13,23 @@ use Yireo\VsfConfigValidator\Validator\ValidatorInterface;
 class Validator implements ValidatorInterface
 {
     /**
-     * @var ApplicationInterface
-     */
-    private $application;
-
-    /**
-     * @var VsfConfiguration
-     */
-    private $vsf;
-
-    /**
      * @var string[]
      */
     private $subValidatorClasses = [
-        Attribute::class
+        AttributeValidator::class
     ];
-
-    /**
-     * Validator constructor.
-     * @param ApplicationInterface $application
-     * @param VsfConfiguration $vsf
-     */
-    public function __construct(ApplicationInterface $application, VsfConfiguration $vsf)
-    {
-        $this->application = $application;
-        $this->vsf = $vsf;
-    }
 
     /**
      * @inheritDoc
      */
-    public function validate(): bool
+    public function validate(ApplicationInterface $application, VsfConfiguration $vsf): bool
     {
-        foreach ($this->subValidatorClasses as $subValidatorClass) {
+        $subValidatorClasses = array_merge($this->subValidatorClasses, $application->getValidatorClasses());
+
+        foreach ($subValidatorClasses as $subValidatorClass) {
             /** @var ValidatorInterface $subValidator */
-            $subValidator = new $subValidatorClass($this->application, $this->vsf);
-            $subValidator->validate();
+            $subValidator = new $subValidatorClass();
+            $subValidator->validate($application, $vsf);
         }
 
         return true;
