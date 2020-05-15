@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Yireo\VsfConfigValidator;
 
 use Yireo\VsfConfigValidator\Validator\AttributeValidator;
+use Yireo\VsfConfigValidator\Validator\ElasticSearchValidator;
+use Yireo\VsfConfigValidator\Validator\StoreViewValidator;
 use Yireo\VsfConfigValidator\Validator\ValidatorInterface;
 
 /**
@@ -16,7 +18,9 @@ class Validator implements ValidatorInterface
      * @var string[]
      */
     private $subValidatorClasses = [
-        AttributeValidator::class
+        AttributeValidator::class,
+        ElasticSearchValidator::class,
+        StoreViewValidator::class
     ];
 
     /**

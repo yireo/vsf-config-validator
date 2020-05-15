@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Yireo\VsfConfigValidator\Application;
 
 use Mage;
+use Mage_Core_Model_Store;
+use Yireo\VsfConfigValidator\Application\Generic\StoreView;
 use Yireo\VsfConfigValidator\ApplicationInterface;
 use Yireo\VsfConfigValidator\Application\Magento1\VsBridgeValidator;
 
@@ -44,6 +47,16 @@ class Magento1 implements ApplicationInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getValidatorClasses(): array
+    {
+        return [
+            VsBridgeValidator::class
+        ];
+    }
+
+    /**
      * @return array
      */
     public function getAttributeCodes(): array
@@ -67,10 +80,19 @@ class Magento1 implements ApplicationInterface
     /**
      * @inheritDoc
      */
-    public function getValidatorClasses(): array
+    public function getStoreViews(): array
     {
-        return [
-            VsBridgeValidator::class
-        ];
+        $return = [];
+        $storeViews = Mage::getmodel('core/store')->getCollection();
+        foreach ($storeViews as $storeView) {
+            /** @var Mage_Core_Model_Store $storeView */
+            $return[] = new StoreView(
+                (int)$storeView->getId(),
+                (string)$storeView->getCode(),
+                (bool)$storeView->getIsActive()
+            );
+        }
+
+        return $return;
     }
 }

@@ -54,6 +54,14 @@ class Magento2 implements ApplicationInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getValidatorClasses(): array
+    {
+        return [];
+    }
+
+    /**
      * @return array
      */
     public function getAttributeCodes(): array
@@ -75,7 +83,7 @@ class Magento2 implements ApplicationInterface
     /**
      * @inheritDoc
      */
-    public function getValidatorClasses(): array
+    public function getStoreViews(): array
     {
         return [];
     }

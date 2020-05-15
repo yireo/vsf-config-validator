@@ -18,7 +18,7 @@ class VsBridgeValidator implements ValidatorInterface
      */
     public function validate(ApplicationInterface $application, VsfConfiguration $vsf): bool
     {
-        $vsf->getDataFromPath('');
+        //$vsf->getDataFromPath('');
 
         return true;
     }

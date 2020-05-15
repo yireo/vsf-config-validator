@@ -22,6 +22,7 @@ class VsfConfiguration
 
     /**
      * VsfConfiguration constructor.
+     *
      * @param string $jsonFile
      */
     public function __construct(
@@ -33,6 +34,8 @@ class VsfConfiguration
 
     /**
      * Initialize
+     *
+     * @throws InvalidArgumentException
      */
     public function init()
     {
@@ -55,6 +58,7 @@ class VsfConfiguration
     /**
      * @param string $path
      * @return array
+     * @throws InvalidArgumentException
      */
     public function getDataFromPath(string $path): array
     {
